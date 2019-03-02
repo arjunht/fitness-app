@@ -3,6 +3,7 @@ import { View } from 'react-native'
 import { getMetricMetaInfo } from '../utils/helpers'
 import Stepper from './Stepper'
 import Slider from './Slider'
+import DateHeader from './DateHeader'
 
 export default class AddEntry extends Component {
 	state = {
@@ -51,29 +52,30 @@ export default class AddEntry extends Component {
 		
 		return (
 			<View>
-			{Object.keys(metaInfo).map((metric) => {
-				const { getIcon, type, ...rest } = metaInfo[metric]
-				const value = this.state[metric]
-				
-				return (
-					<View key={metric}>
-						{getIcon()}
-						{ type === 'slider'
-							? 	<Slider
-									value={value}
-									onChange={(value) => this.slide(metric, value)}
-									{...rest}
-								/>
-							:	<Stepper
-									value={value}
-									onIncrement={() => this.increment(metric)}
-									onDecrement={() => this.decrement(metric)}
-									{...rest}
-								/>
-						}
-					</View>
-				)
-			})}
+				<DateHeader date={(new Date()).toLocaleDateString()} />
+				{Object.keys(metaInfo).map((metric) => {
+					const { getIcon, type, ...rest } = metaInfo[metric]
+					const value = this.state[metric]
+					
+					return (
+						<View key={metric}>
+							{getIcon()}
+							{ type === 'slider'
+								? 	<Slider
+										value={value}
+										onChange={(value) => this.slide(metric, value)}
+										{...rest}
+									/>
+								:	<Stepper
+										value={value}
+										onIncrement={() => this.increment(metric)}
+										onDecrement={() => this.decrement(metric)}
+										{...rest}
+									/>
+							}
+						</View>
+					)
+				})}
 			</View>
 		);
 	}

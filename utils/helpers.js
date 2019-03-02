@@ -50,9 +50,9 @@ export function getMetricMetaInfo (metric) {
 	const info = {
 		run: {
 			displayName: 'Run',
-			max: '50',
+			max: 50,
 			unit: 'miles',
-			step: '1',
+			step: 1,
 			type: 'steppers',
 			getIcon() {
 				return (
@@ -68,9 +68,9 @@ export function getMetricMetaInfo (metric) {
 		},
 		bike: {
 			displayName: 'Bike',
-			max: '100',
+			max: 100,
 			unit: 'miles',
-			step: '1',
+			step: 1,
 			type: 'steppers',
 			getIcon() {
 				return (
@@ -86,9 +86,9 @@ export function getMetricMetaInfo (metric) {
 		},
 		swim: {
 			displayName: 'Swim',
-			max: '9900',
+			max: 9900,
 			unit: 'meters',
-			step: '100',
+			step: 100,
 			type: 'steppers',
 			getIcon() {
 				return (

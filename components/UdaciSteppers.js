@@ -1,12 +1,12 @@
 import React from 'react'
 import { View, Text } from 'react-native'
 
-const Stepper = () => {
+const UdaciSteppers = () => {
 	return (
 		<View>
-			<Text>Stepper</Text>
+			<Text>UdaciSteppers</Text>
 		</View>
 	)
 }
 
-export default Stepper
+export default UdaciSteppers

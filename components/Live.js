@@ -1,19 +1,86 @@
 import React, { Component } from 'react'
-import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, Animated } from 'react-native'
 import { Foundation } from '@expo/vector-icons'
 import { purple, white } from '../utils/colors'
+import { Location, Permissions } from 'expo'
+import { calculateDirection } from '../utils/helpers'
 
 class Live extends Component {
 	
 	state = {
-		coords: null,
-		status: 'granted',
-		direction: ''
+		coords: 0,
+		status: 'denied',
+		direction: '',
+		bounceValue: new Animated.Value(1)
+	}
+	
+	componentDidMount() {
+		Permissions.getAsync(Permissions.LOCATION)
+			.then(({ status }) => {
+				if(status === 'granted') {
+					return this.setLocation()
+				}
+				
+				this.setState({
+					status
+				})
+			})
+			.catch((error) => {
+				console.warn('Error getting Location permission: ', error)
+				
+				this.setState({
+					status: 'undetermined'
+				})
+			})
+	}
+	
+	askPermission = () => {
+		Permissions.askAsync(Permissions.LOCATION)
+			.then(({ status }) => {
+				if (status === 'granted') {
+					this.setLocation()
+				}
+				
+				this.setState({
+					status
+				})
+			})
+			.catch((error) => {
+				console.warn('Error asking Location permission: ', error)
+				
+				this.setState({
+					status: 'undetermined'
+				})
+			})
+	}
+	
+	setLocation = () => {
+		Location.watchPositionAsync({
+			enableHighAccuracy: true,
+			timeInterval: 1,
+			distanceInterval: 1
+		}, ({ coords }) => {
+			const newDirection = calculateDirection(coords.heading)
+			const { direction, bounceValue } = this.state
+			
+			if (newDirection !== direction) {
+				Animated.sequence([
+					Animated.timing(bounceValue, { toValue: 1.04, duration: 200 }),
+					Animated.spring(bounceValue, { toValue: 1, fiction: 4 })
+				]).start()
+			}
+			
+			this.setState({
+				coords,
+				status: 'granted',
+				direction: newDirection
+			})
+		})
 	}
 	
 	render() {
 		
-		const { coords, status, direction } = this.state
+		const { coords, status, direction, bounceValue } = this.state
 		
 		if (status === null) {
 			return <ActivityIndicator style={{marginTop: 30}} />
@@ -26,6 +93,11 @@ class Live extends Component {
 					<Text>
 						You denied your location. You can fix this by visiting your settings and enabling location services for this app.
 					</Text>
+					<TouchableOpacity style={styles.button} onPress={this.askPermission}>
+						<Text style={styles.buttonText}>
+							Enable
+						</Text>
+					</TouchableOpacity>
 				</View>
 			)
 		}
@@ -50,9 +122,7 @@ class Live extends Component {
 			<View style={styles.container}>
 				<View style={styles.directionContainer}>
 					<Text style={styles.header}>You're heading</Text>
-					<Text style={styles.direction}>
-						North
-					</Text>
+					<Animated.Text style={[styles.direction, {transform: [{scale: bounceValue}]}]}>{direction}</Animated.Text>
 				</View>
 				<View style={styles.metricContainer}>
 					<View style={styles.metric}>
@@ -60,7 +130,7 @@ class Live extends Component {
 							Altitude
 						</Text>
 						<Text style={[styles.subHeader, {color: white}]}>
-							{200} feet
+							{Math.round(coords.altitude * 3.2808)} feet
 						</Text>
 					</View>
 					<View style={styles.metric}>
@@ -68,7 +138,7 @@ class Live extends Component {
 							Speed
 						</Text>
 						<Text style={[styles.subHeader, {color: white}]}>
-							{300} MPH
+							{(coords.speed * 2.2369).toFixed(1)} MPH
 						</Text>
 					</View>
 				</View>
